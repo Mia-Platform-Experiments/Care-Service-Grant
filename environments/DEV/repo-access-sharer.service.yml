@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: repo-access-sharer
+  annotations:
+    mia-platform.eu/version: 15.2.0
+  labels:
+    app: repo-access-sharer
+    app.kubernetes.io/name: repo-access-sharer
+    app.kubernetes.io/version: latest
+    app.kubernetes.io/component: custom
+    app.kubernetes.io/part-of: care-service-grant
+    app.kubernetes.io/managed-by: mia-platform
+    mia-platform.eu/stage: DEV
+    mia-platform.eu/tenant: b933f1ef-5b8e-4adf-a346-24a3b03d13e8
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 3000
+      nodePort: null
+  selector:
+    app: repo-access-sharer

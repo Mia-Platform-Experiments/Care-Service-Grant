@@ -1,0 +1,123 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: repo-access-sharer
+  annotations:
+    mia-platform.eu/version: 15.2.0
+    apparmor.security.beta.kubernetes.io/allowedProfileNames: runtime/default
+    apparmor.security.beta.kubernetes.io/defaultProfileName: runtime/default
+    fluentbit.io/parser: pino
+  labels:
+    app: repo-access-sharer
+    app.kubernetes.io/name: repo-access-sharer
+    app.kubernetes.io/version: latest
+    app.kubernetes.io/component: custom
+    app.kubernetes.io/part-of: care-service-grant
+    app.kubernetes.io/managed-by: mia-platform
+    mia-platform.eu/stage: DEV
+    mia-platform.eu/tenant: b933f1ef-5b8e-4adf-a346-24a3b03d13e8
+    mia-platform.eu/log-type: mia-json
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: repo-access-sharer
+  strategy:
+    type: RollingUpdate
+  revisionHistoryLimit: 1
+  template:
+    metadata:
+      annotations:
+        apparmor.security.beta.kubernetes.io/allowedProfileNames: runtime/default
+        apparmor.security.beta.kubernetes.io/defaultProfileName: runtime/default
+        fluentbit.io/parser: pino
+      labels:
+        app: repo-access-sharer
+        app.kubernetes.io/name: repo-access-sharer
+        app.kubernetes.io/version: latest
+        app.kubernetes.io/component: custom
+        app.kubernetes.io/part-of: care-service-grant
+        app.kubernetes.io/managed-by: mia-platform
+        mia-platform.eu/stage: DEV
+        mia-platform.eu/tenant: b933f1ef-5b8e-4adf-a346-24a3b03d13e8
+        mia-platform.eu/log-type: mia-json
+    spec:
+      imagePullSecrets:
+        - name: nexus-gcloud
+        - name: orca-ghcr
+        - name: orca-google-registry
+        - name: ghcr-pull
+        - name: miademoacr-secret
+      terminationGracePeriodSeconds: 30
+      serviceAccountName: repo-access-sharer
+      containers:
+        - name: repo-access-sharer
+          image: ghcr.io/mia-platform-experiments/repo-access-sharer:latest
+          imagePullPolicy: Always
+          resources:
+            limits:
+              memory: 150Mi
+              cpu: 100m
+            requests:
+              memory: 150Mi
+              cpu: 100m
+          volumeMounts: []
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          args: []
+          env:
+            - name: LOG_LEVEL
+              value: info
+            - name: HTTP_PORT
+              value: '3000'
+            - name: REPOSITORY_PROVIDER
+              value: github
+            - name: GITHUB_ORG
+              value: Mia-Platform-Experiments
+            - name: TARGET_TEAM_SLUG
+              value: care-service-grant-test
+            - name: TEAM_PERMISSION
+              value: push
+            - name: ALLOWED_TENANT_IDS
+              value: b933f1ef-5b8e-4adf-a346-24a3b03d13e8
+            - name: RETRY_ATTEMPTS
+              value: '6'
+            - name: GITHUB_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: repo-access-sharer
+                  key: GITHUB_TOKEN
+            - name: WEBHOOK_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: repo-access-sharer
+                  key: WEBHOOK_SECRET
+          readinessProbe:
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 3
+            httpGet:
+              port: http
+              path: /-/ready
+          livenessProbe:
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            timeoutSeconds: 1
+            failureThreshold: 3
+            httpGet:
+              port: http
+              path: /-/healthz
+          securityContext:
+            allowPrivilegeEscalation: false
+            privileged: false
+      volumes: []
+      hostIPC: false
+      hostNetwork: false
+      hostPID: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
