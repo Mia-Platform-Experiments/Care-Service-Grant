@@ -6,3 +6,20 @@ secrets:
       password: "{{NEXUS_TOKEN}}"
       email: "operations@mia-platform.eu"
       server: "{{NEXUS_URL}}"
+  - name: "ghcr-pull"
+    when: "always"
+    docker:
+      username: "{{GHCR_USER}}"
+      password: "{{GHCR_TOKEN}}"
+      email: "noreply@github.com"
+      server: "ghcr.io"
+  # Credentials of repo-access-sharer, read by the service as env "from secret".
+  - name: "repo-access-sharer"
+    when: "always"
+    data:
+      - from: "literal"
+        key: "GITHUB_TOKEN"
+        value: "{{SHARER_GITHUB_TOKEN}}"
+      - from: "literal"
+        key: "WEBHOOK_SECRET"
+        value: "{{SHARER_WEBHOOK_SECRET}}"

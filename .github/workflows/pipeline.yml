@@ -39,6 +39,14 @@ jobs:
           NEXUS_USER: ${{ secrets.NEXUS_USER }}
           NEXUS_TOKEN: ${{ secrets.NEXUS_TOKEN }}
           NEXUS_URL: ${{ secrets.NEXUS_URL }}
+          # Values used by mlp.yaml (repository secrets). The MIA_ copies match
+          # the ENVIRONMENT_VARIABLES_PREFIX used by mlp generate.
+          GHCR_USER: ${{ secrets.GHCR_USER }}
+          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+          MIA_GHCR_USER: ${{ secrets.GHCR_USER }}
+          MIA_GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+          MIA_SHARER_GITHUB_TOKEN: ${{ secrets.SHARER_GITHUB_TOKEN }}
+          MIA_SHARER_WEBHOOK_SECRET: ${{ secrets.SHARER_WEBHOOK_SECRET }}
         run: |
           export RELEASE_DATE="$(date -I'seconds' -u)"
           tee /tmp/ca.pem > /dev/null << EOF
